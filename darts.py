@@ -32,10 +32,9 @@ def plot_board(plt): # draws board
                 x[f'{theta}{np.sign(x_i)}'].append(x_i)
                 y[f'{theta}{np.sign(x_i)}'].append(x_i*np.tan(theta))
     for rad in [r_Ibull,r_Obull,r_IT,r_OT,r_ID,r_OD]:
-        plt.plot(x[f'{rad}'],y[f'{rad}'],color='k',linestyle='-')
-        plt.plot(x[f'{rad}'],-np.array(y[f'{rad}']),color='k',linestyle='-')
+        plt.plot(x[f'{rad}']+x[f'{rad}'][::-1],y[f'{rad}']+list(-np.array(y[f'{rad}'][::-1])),color='k',linestyle='-')
     for theta in np.arange(-9*np.pi/20,11*np.pi/20,np.pi/10):
-        plt.plot(x[f'{theta}-1.0'],y[f'{theta}-1.0'],color='k',linestyle='-')
+        plt.plot(x[f'{theta}-1.0'],y[f'{theta}-1.0']+list(),color='k',linestyle='-')
         plt.plot(x[f'{theta}1.0'],y[f'{theta}1.0'],color='k',linestyle='-')
     return()
 
