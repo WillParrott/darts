@@ -8,12 +8,15 @@ import matplotlib.pyplot as plt
 import collections
 figsca = 14  #size for saving figs
 figsize = ((figsca,figsca))
-
+plt.rc("font",**{"size":20})
+plt.rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+plt.rc('text', usetex=True)
+#############################
 
 r_Ibull,r_Obull,r_IT,r_OT,r_ID,r_OD = 6.35,16,99,107,162,170# all in mm
 Ordering = [20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5]
 resolution = my_std/10 # divide into squares of the side lenght, mm
-iterations = 1000
+iterations = 10000 # 10000 is good here
 xran = np.arange(-r_OD,r_OD+resolution,resolution)
 if resolution>2: resolution = 2
 
@@ -23,28 +26,40 @@ def main():
     for ix,x in enumerate(xran):
         for y in xran:
             if x**2 + y**2 > r_OD**2: continue
-            xy = np.random.normal(loc=(x,y),scale=my_std,size=(iterations,2)) # returns list iterations long, with [x,y] for each
-            av = 0
-            for i_it in xy:
-                score = get_score(i_it[0],i_it[1])
-                av += score
+            av = generate_av_score(x,y)
             results['pos'].append(f'{x}_{y}')
-            results['score'].append(av/iterations)
+            results['score'].append(av)
         progbar(ix+1,len(xran))
-    progbar(len(xran),len(xran))
+    T20av = generate_av_score(0,r_IT+4)
     best = max(results['score'])
     print(f'For {iterations} darts thrown with a standard deviation of {my_std}mm, the best average score per dart is {best}')
+    print(f'For this skill level, aiming at T20 would give you {T20av}')
     for i,el in enumerate(results['score']):
         if el == best:
             xs.append(float(results['pos'][i].split('_')[0]))
             ys.append(float(results['pos'][i].split('_')[1]))
     plt.figure(figsize=figsize)
     plot_board(plt)
-    plt.errorbar(xs,ys,fmt='x',color='r')
+    plot_results(xs,ys,plt)
+    plt.title(f'$\sigma={my_std}$mm, Average {best:.1f} per dart $= {100*(best-T20av)/T20av:.1f}\%$ better')
     plt.savefig(f'plots/Std_{my_std}mm_iters_{iterations}.pdf')
     plt.close()
     return()
 
+def generate_av_score(x,y):
+    xy = np.random.normal(loc=(x,y),scale=my_std,size=(iterations,2)) # returns list iterations long, with [x,y] for each
+    av = 0
+    for i_it in xy:
+        score = get_score(i_it[0],i_it[1])
+        av += score
+    return(av/iterations)
+
+def plot_results(xs,ys,plt):
+    for i in range(len(xs)):
+        plt.errorbar(xs[i],ys[i],fmt='x',color='r')
+        circ = plt.Circle((xs[i],ys[i]),my_std,color='r',fill=False)
+        plt.gca().add_patch(circ)
+    return()
 
 def plot_board(plt): # draws board
     x,y = collections.defaultdict(list),collections.defaultdict(list)
