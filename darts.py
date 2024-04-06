@@ -1,22 +1,24 @@
 my_std = float(input('What would you estimate the standard deviation of your dart throws to be, in mm? '))  # my standard deviation in mm
+if my_std <4:
+    print(f"Chosen standard deviation of {my_std} is too small so has been set to 4mm. Just aim for T20, you smug cunt.")
+    my_std = 4
 #############################
 import numpy as np
 import matplotlib.pyplot as plt
 import collections
 figsca = 14  #size for saving figs
 figsize = ((figsca,figsca))
-#test
 
 
 r_Ibull,r_Obull,r_IT,r_OT,r_ID,r_OD = 6.35,16,99,107,162,170# all in mm
 Ordering = [20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5]
-resolution = 1 # divide into squares of the side lenght, mm
+resolution = my_std/10 # divide into squares of the side lenght, mm
 iterations = 1000
-xran = np.arange(-200,200+resolution,resolution)
-
+xran = np.arange(-r_OD,r_OD+resolution,resolution)
+if resolution>2: resolution = 2
 
 def main():
-    print(f'Calculating the best place to aim for a player with a standard deviation of {my_std}mm')
+    print(f'Calculating the best place to aim for a player with a standard deviation of {my_std}mm: resolution {resolution}mm')
     results,xs,ys = collections.defaultdict(list),[],[]
     for ix,x in enumerate(xran):
         for y in xran:
@@ -39,13 +41,14 @@ def main():
     plt.figure(figsize=figsize)
     plot_board(plt)
     plt.errorbar(xs,ys,fmt='x',color='r')
-    plt.show()
+    plt.savefig(f'plots/Std_{my_std}mm_iters_{iterations}.pdf')
+    plt.close()
     return()
 
 
 def plot_board(plt): # draws board
     x,y = collections.defaultdict(list),collections.defaultdict(list)
-    for x_i in xran:
+    for x_i in np.arange(-r_OD,r_OD+0.1,0.1):
         for rad in [r_Ibull,r_Obull,r_IT,r_OT,r_ID,r_OD]:
             if x_i**2 <= rad**2:
                 x[f'{rad}'].append(x_i)
